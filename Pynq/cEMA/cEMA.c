@@ -19,7 +19,7 @@ reset(PyObject *self)
 static PyObject *
 ema(PyObject *self, PyObject *args)
 {
-    uint32_t num;
+    unsigned long num;
 
     if (!PyArg_ParseTuple(args, "l", &num))
         return NULL;
@@ -67,7 +67,7 @@ ema_all(PyObject *self, PyObject *args)
 
 
 static PyMethodDef cEMAMethods[] = {
-    {"reset", reset, METH_VARARGS, "reset the ema initial state"},
+    {"reset", (PyCFunction) reset, METH_VARARGS, "reset the ema initial state"},
     {"ema", ema, METH_VARARGS, "run ema on a unint64_t value"}, 
     {"ema_all",  ema_all, METH_VARARGS, "run ema on a list of values"}, 
     {NULL, NULL, 0, NULL}        /* Sentinel */

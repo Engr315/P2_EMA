@@ -149,7 +149,6 @@ class Helper():
                     'git remote add pynq xilinx@' + self.J['IP'] + ':~/jupyter_notebooks/' + proj,
                     'GIT_SSH_COMMAND=\'ssh -i '+self.priv_key + '\' git push pynq ' + self.J['branch'], 
                     ssh + ' "cd ~/jupyter_notebooks/' + proj + ' && git checkout ' + self.J['branch'] + '"',
-                    ssh + ' "cd ~/jupyter_notebooks/' + proj + ' && git config receive.denyCurrentBranch" '
                    ]   
         for command in commands:                     
             self.run_command(command)
@@ -174,6 +173,30 @@ class Helper():
         for command in commands:                     
             self.run_command(command)
 
+    def update(self):
+        ''' running git update from master and pushing to pynq '''
+        ssh = 'ssh -i ' + self.priv_key + ' xilinx@'+self.J['IP'] 
+        proj = self.J['Proj']
+
+        commands = [
+                    'git pull origin ' + self.J['branch'], 
+                    'GIT_SSH_COMMAND=\'ssh -i '+self.priv_key + '\' git pull pynq ' + self.J['branch'], 
+
+                    ssh + ' "cd ~/jupyter_notebooks/' + proj + ' && git commit -a -m \\"update commit\\" ' + '"',
+
+                    ssh + ' "mkdir -p ~/tmp" ',
+                    ssh + ' "cd ~/tmp && git init --bare" ',
+                    'git remote remove tmp', 
+                    'git remote add tmp xilinx@' + self.J['IP'] + ':~/tmp/',
+                    'GIT_SSH_COMMAND=\'ssh -i '+self.priv_key + '\' git push tmp ' + self.J['branch'], 
+                    ssh + ' "cd ~/jupyter_notebooks/' + proj + ' && git pull origin ' + self.J['branch'] + '"',
+                    ssh + ' "rm -rf ~/tmp" ',
+        ]
+
+        for command in commands:                     
+            self.run_command(command)
+
+        
     def set_ip(self, IP):
         # https://www.geeksforgeeks.org/python-program-to-validate-an-ip-address/
         regex = '''^(25[0-5]|2[0-4][0-9]|[0-1]?[0-9][0-9]?)\.( 
@@ -227,6 +250,8 @@ class Parser():
 
         bitstream_ap= sap.add_parser('bitstream', help='write the bitstream to the Pynq')
         bitstream_ap.add_argument('--ip', type=str, nargs='?', help="Ip Address of Pynq")
+
+        update_ap= sap.add_parser('update', help='update from git') 
 
         setIp_ap= sap.add_parser('setIp', help='set the Pynq\'s IP address')
         setIp_ap.add_argument('--ip', type=str, nargs='?', help="Ip Address of Pynq")
@@ -290,6 +315,10 @@ class Parser():
             h.set_ip(args.ip)
         h.load_bitstream()
 
+    def update(self, args):
+        print('Running update')
+        h = Helper()
+        h.update()
 
     def setIp(self, args):
         print ('Running setIp')
