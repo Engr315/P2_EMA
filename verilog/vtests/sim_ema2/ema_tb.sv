@@ -40,6 +40,7 @@ always #10 ACLK=~ACLK;
    reg [31:0] test_write_data;
    reg [31:0] last_read_data;
    logic [31:0] recv;    
+   logic        last;
 
 
 task init_signals();
@@ -79,7 +80,8 @@ task send_word(
 endtask
 
 task recv_word(
-    output logic [31:0] data
+    output logic [31:0] data,
+    output logic        last
     );
     
     M_AXIS_TREADY = 'h1;
@@ -91,6 +93,7 @@ task recv_word(
     
     //@(negedge ACLK);
     data = M_AXIS_TDATA;
+    last = M_AXIS_TLAST;
     @(negedge ACLK);
     M_AXIS_TREADY = 'h0;
     
@@ -99,11 +102,13 @@ endtask
 task send_and_recv(
     input logic [31:0] send_data,
     input logic        send_last,
-    output logic [31:0] recv_data
+    output logic [31:0] recv_data,
+    output logic        recv_last
     );
+    logic last; //unused for now
     fork
         send_word(send_data, send_last);
-        recv_word(recv_data);
+        recv_word(recv_data, recv_last);
     join
 endtask
 
@@ -123,43 +128,72 @@ initial begin
     for ( i = 100; i < 32'h640; i=i+100) begin
         test_write_data = i;
         $display("Writing Data: %h", test_write_data);
-        send_and_recv(test_write_data, 0, recv);
-        $display( "Read Data: %h", recv );
+        send_and_recv(test_write_data, (i == 32'h640-100), recv, last);
+        $display( "Read Data: %h Last:%h", recv, last  );
 
         assert( recv == ((test_write_data >> 2) + (last_read_data >> 2) + (last_read_data >> 1)))
             else $fatal(1, "Bad Test Response: %h != %h", recv,
             ((test_write_data >> 2) + (last_read_data >> 2) + (last_read_data >> 1)) );
+        assert (last == (i == 32'h640-100)) else $fatal(1, "Bad Last signal %h != %h", last, (i == 32'h640-100));
+
         last_read_data = recv;
     end
     
     @(negedge ACLK);
-    $display("Testing for correct TVALID and TDATA");
+    $display("Testing for correct S_AXIS_TVALID");
     
     for ( i = 100; i < 32'h640; i=i+100) begin
         S_AXIS_TDATA = 'h0; //i[31:0];
         S_AXIS_TKEEP = 'hf;
-        S_AXIS_TVALID='h1;
+        S_AXIS_TVALID= 'h0;
         M_AXIS_TREADY = 'h0;
         @(negedge ACLK);
     end
     
+    $display("Testing for correct M_AXIS_TREADY");
     for ( i = 100; i < 32'h640; i=i+100) begin
         S_AXIS_TDATA = 'h0; //i[31:0];
         S_AXIS_TKEEP = 'hf;
-        S_AXIS_TVALID='h0;
+        S_AXIS_TVALID= 'h0;
         M_AXIS_TREADY = 'h1;
         @(negedge ACLK);
     end
-    
+   
+    $display("Testing for correct resume");
     test_write_data = 32'hffff;
     $display("Writing Data: %h", test_write_data);
-    send_and_recv(test_write_data, 0, recv);
+    send_and_recv(test_write_data, 0, recv, last);
     $display( "Read Data: %h", recv );
 
     assert( recv == ((test_write_data >> 2) + (last_read_data >> 2) + (last_read_data >> 1)))
             else $fatal(1, "Bad Test Response: %h != %h", recv,
             ((test_write_data >> 2) + (last_read_data >> 2) + (last_read_data >> 1)) );
+    assert( last == 0) else $fatal(1, "Bad Last: %h != %h", last, 0);
+    last_read_data = recv;
+    
    
+    $display("Testing delayed read");
+    M_AXIS_TREADY = 'h0;
+    fork
+        begin
+            test_write_data = 32'hbaad;
+            $display("Writing Data: %h", test_write_data);
+            send_word(test_write_data, 0);
+            test_write_data = 32'hbeef;
+            $display("Writing Data: %h", test_write_data);
+            send_word(test_write_data, 1);
+        end
+        begin
+
+            $display("stalling read");
+            for (int i = 0; i < 100; ++i) @(negedge ACLK);
+            recv_word(recv, last);
+            $display( "Read Data: %h", recv );
+            recv_word(recv, last);
+            $display( "Read Data: %h", recv );
+        end
+    join
+
     $display("@@@Passed");
     $finish;
 end
