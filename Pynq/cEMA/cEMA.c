@@ -25,7 +25,7 @@ ema(PyObject *self, PyObject *args)
         return NULL;
     
     //FIXME
-    uint32_t res = 0; 
+    long res = 0; 
     
     return PyLong_FromLong(res);
 }
@@ -40,7 +40,7 @@ ema_all(PyObject *self, PyObject *args)
 {
     PyObject *x_lst; //input list
     PyObject *y_lst; //output list
-    uint32_t sz;
+    long sz;
 
     //parse the list argument
     if (!PyArg_ParseTuple(args, "O", &x_lst)) {
