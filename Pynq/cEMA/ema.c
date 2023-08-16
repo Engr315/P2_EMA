@@ -4,14 +4,14 @@
 
 #include "ema.h"
 
-static uint32_t y; //FIXME
+static long y; //FIXME
 
 void ema_reset( void )
 {
     ;//FIXME
 }
 
-uint32_t ema_simple(uint32_t x)
+long ema_simple(long x)
 {
     ;//FIXME
     return y;
