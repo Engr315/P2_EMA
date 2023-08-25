@@ -20,7 +20,7 @@ int main()
 
     printf("Input X: ["); 
     for (int i = 0; i < size; ++i){
-        printf(" %u", x[i]);
+        printf(" %lu", x[i]);
     }
     printf(" ]\n");
 
@@ -32,7 +32,7 @@ int main()
 
     printf("\nSimple EMA (Y1): ["); 
     for (int i = 0; i < size; ++i){
-        printf(" %u", c_y1[i]);
+        printf(" %lu", c_y1[i]);
     }
     printf(" ]\n");
 
@@ -40,8 +40,8 @@ int main()
     for (int i = 0; i < size; ++i){
         if (c_y1[i] != expect_y1[i]){
             printf("FAILED!\n\tFound Mismatch at Index: %d\n", i);
-            printf("\tExpected: %u\n", expect_y1[i]);
-            printf("\tFound: %u\n", c_y1[i]);
+            printf("\tExpected: %lu\n", expect_y1[i]);
+            printf("\tFound: %lu\n", c_y1[i]);
             exit(-1);
         }
     }
@@ -61,7 +61,7 @@ int main()
 
     printf("\nTriple EMA (Y3): ["); 
     for (int i = 0; i < size; ++i){
-        printf(" %u", c_y3[i]);
+        printf(" %lu", c_y3[i]);
     }
     printf(" ]\n");
 
@@ -69,8 +69,8 @@ int main()
     for (int i = 0; i < size; ++i){
         if (c_y3[i] != expect_y3[i]){
             printf("FAILED!\n\tFound Mismatch at Index: %d\n", i);
-            printf("\tExpected: %u\n", expect_y3[i]);
-            printf("\tFound: %u\n", c_y3[i]);
+            printf("\tExpected: %lu\n", expect_y3[i]);
+            printf("\tFound: %lu\n", c_y3[i]);
             exit(1);
         }
     }
