@@ -1,4 +1,4 @@
-# P3_EMA
+# P2_EMA (in C) and P3_EMA (in HW)
 
 
 This project comes with a helper Python script.  We've provided a helper script
