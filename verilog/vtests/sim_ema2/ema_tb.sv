@@ -146,7 +146,7 @@ initial begin
         S_AXIS_TDATA = 'h0; //i[31:0];
         S_AXIS_TKEEP = 'hf;
         S_AXIS_TVALID= 'h0;
-        M_AXIS_TREADY = 'h0;
+        M_AXIS_TREADY = 'h1;
         @(negedge ACLK);
     end
     
@@ -154,8 +154,8 @@ initial begin
     for ( i = 100; i < 32'h640; i=i+100) begin
         S_AXIS_TDATA = 'h0; //i[31:0];
         S_AXIS_TKEEP = 'hf;
-        S_AXIS_TVALID= 'h0;
-        M_AXIS_TREADY = 'h1;
+        S_AXIS_TVALID= 'h1;
+        M_AXIS_TREADY = 'h0;
         @(negedge ACLK);
     end
    
