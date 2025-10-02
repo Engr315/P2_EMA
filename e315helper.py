@@ -58,7 +58,8 @@ class Helper():
 
     def run_command(self, command):
         print ('running: ', command)
-        result = subprocess.Popen(command, shell=True, executable='/usr/bin/bash', stdout=subprocess.PIPE, stdin=subprocess.PIPE)
+        result = subprocess.Popen(command, shell=True, executable='/bin/bash', \
+                            stdout=subprocess.PIPE, stdin=subprocess.PIPE)
         return result.communicate()
 
     def vivado_build_cleanup(self,):
@@ -149,6 +150,7 @@ class Helper():
                     'git remote add pynq xilinx@' + self.J['IP'] + ':~/jupyter_notebooks/' + proj,
                     'GIT_SSH_COMMAND=\'ssh -i '+self.priv_key + '\' git push pynq ' + self.J['branch'], 
                     ssh + ' "cd ~/jupyter_notebooks/' + proj + ' && git checkout ' + self.J['branch'] + '"',
+                    ssh + ' "cd ~/jupyter_notebooks/' + proj + ' && git config receive.denyCurrentBranch" '
                    ]   
         for command in commands:                     
             self.run_command(command)
